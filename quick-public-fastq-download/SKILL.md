@@ -7,6 +7,21 @@ description: Build and operate fast, resumable, checksum-verified FASTQ intake f
 
 Use direct ENA FASTQ objects when authoritative byte counts and MD5 checksums are available. Optimize wall time with bounded parallelism, but treat validation—not process exit status—as completion.
 
+## What makes this skill fast
+
+- It downloads ENA's ready-made FASTQs directly, avoiding slower SRA-to-FASTQ conversion when direct objects exist.
+- `download_fastq.py` runs multiple files concurrently and uses aria2 segmented connections within each file.
+- Validated files are checkpointed and skipped on every recovery run, so retries touch only missing or invalid data.
+- LSF arrays spread independent files across available hosts while keeping a concurrency ceiling.
+
+The fast path requires `aria2c`; without it, the script deliberately falls back to single-stream curl for correctness. After the smoke test, a well-provisioned server can explicitly use the proven high-throughput profile:
+
+```bash
+python3 scripts/download_fastq.py manifest.tsv fastq --workers 24 --connections 4
+```
+
+Scale this profile down if retries rise, per-connection throughput collapses, or shared storage becomes saturated.
+
 ## Required invariants
 
 - Never embed credentials, hostnames, private paths, or project-specific identifiers in reusable output.

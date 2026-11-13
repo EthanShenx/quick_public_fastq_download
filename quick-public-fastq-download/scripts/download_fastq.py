@@ -234,10 +234,14 @@ def main() -> None:
     if free < needed + reserve:
         raise SystemExit(f"insufficient free space: need {needed + reserve} bytes including reserve, have {free}")
 
+    engine = "aria2c-multisegment" if args.aria2c else "curl-single-stream"
     print(
         f"PLAN\tfiles={len(indexed)}\tmissing_bytes={needed}\tworkers={min(args.workers, len(indexed))}"
-        f"\tconnections={args.connections}\thttps_default={not args.allow_http}"
+        f"\tconnections={args.connections if args.aria2c else 1}\tengine={engine}"
+        f"\thttps_default={not args.allow_http}"
     )
+    if not args.aria2c:
+        print("NOTICE\taria2c not found; using the safe single-stream curl fallback", file=sys.stderr)
     if args.dry_run:
         return
     if not args.aria2c and not args.curl:
