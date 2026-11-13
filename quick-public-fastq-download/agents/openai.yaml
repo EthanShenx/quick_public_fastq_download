@@ -1,0 +1,4 @@
+interface:
+  display_name: "Quick Public FASTQ Download"
+  short_description: "Fast, resumable, verified public FASTQ intake"
+  default_prompt: "Use $quick-public-fastq-download to plan and run a fast, checksum-verified public FASTQ download."
